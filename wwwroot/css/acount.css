@@ -1,0 +1,36 @@
+﻿.account-container {
+    background-image: url('../images/account-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    backdrop-filter: blur(4px);
+}
+
+.account-box {
+    background: rgba(50, 25, 100, 0.85); /* Semi-transparente morado */
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    max-width: 400px;
+    width: 100%;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

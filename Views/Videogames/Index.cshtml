@@ -1,0 +1,129 @@
+﻿@model VideogamesPOS.Models.ViewModels.VideogameIndexViewModel
+@{
+    ViewData["Title"] = "Videogames Library";
+}
+
+<link rel="stylesheet" href="~/css/videogamestable.css" />
+
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">🎮 Videogames Library</h1>
+            <p class="page-subtitle">Manage your videogame inventory</p>
+        </div>
+        <a asp-action="Create" class="btn btn-create">
+            <span class="btn-icon">➕</span>
+            Add New Game
+        </a>
+    </div>
+
+    <form asp-action="Index" method="get" class="search-filters">
+        <div class="search-container">
+            <input type="text" id="searchInput" name="searchTerm" value="@Model.SearchTerm" placeholder="Search games..." class="search-input">
+            <span class="search-icon">🔍</span>
+        </div>
+        <div class="filter-container">
+            <select name="sortOrder id="sortSelect" class="filter-select" onchange="this.form.submit()">
+                <option value="name" selected="@(Model.SortOrder == "name" ? "selected" : null)">Sort by Name</option>
+                <option value="rating" selected="@(Model.SortOrder == "rating" ? "selected" : null)">Sort by Rating</option>
+                <option value="price" selected="@(Model.SortOrder == "price" ? "selected" : null)">Sort by Price</option>
+                <option value="release" selected="@(Model.SortOrder == "release" ? "selected" : null)">Sort by Release Date</option>
+            </select>
+        </div>
+    </form>
+
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="videogame-table" id="videogameTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="image">Image</th>
+                        <th class="sortable" data-sort="name">Name</th>
+                        <th class="sortable" data-sort="description">Description</th>
+                        <th class="sortable" data-sort="release">Release Date</th>
+                        <th class="sortable" data-sort="price">Price</th>
+                        <th class="sortable" data-sort="stock">Stock</th>
+                        <th class="sortable" data-sort="rating">Rating</th>
+                        <th class="actions-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Videogames)
+
+                    {
+                        <tr class="table-row" data-name="@item.Name" data-rating="@item.Rating" data-price="@item.Price" data-release="@item.ReleaseDate.ToString("yyyy-MM-dd")">
+                            <td class="image-cell">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Name" class="game-image" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="no-image">🎮</div>
+                                }
+                            </td>
+                            <td class="name-cell">
+                                <span class="game-name">@Html.DisplayFor(modelItem => item.Name)</span>
+                            </td>
+                            <td class="description-cell">
+                                <span class="game-description" title="@item.Description">
+                                    @(item.Description?.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
+                                </span>
+                            </td>
+                            <td class="date-cell">
+                                <span class="release-date">@item.ReleaseDate.Year</span>
+                            </td>
+                            <td class="price-cell">
+                                <span class="price">$@Html.DisplayFor(modelItem => item.Price)</span>
+                            </td>
+                            <td class="stock-cell">
+                                <span class="stock @(item.Stock <= 5 ? "stock-low" : item.Stock <= 10 ? "stock-medium" : "stock-high")">
+                                    @Html.DisplayFor(modelItem => item.Stock)
+                                </span>
+                            </td>
+                            <td class="rating-cell">
+                                <div class="rating-display">
+                                    <span class="rating-value">@Html.DisplayFor(modelItem => item.Rating)</span>
+                                </div>
+                            </td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn btn-edit" title="Edit">
+                                        <span class="btn-icon">✏️</span>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="action-btn btn-details" title="Details">
+                                        <span class="btn-icon">👁️</span>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="action-btn btn-delete" title="Delete" onclick="return confirmDelete('@item.Name')">
+                                        <span class="btn-icon">🗑️</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Videogames.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🎮</div>
+                <h3>No videogames found</h3>
+                <p>Start building your library by adding your first game!</p>
+                <a asp-action="Create" class="btn btn-create">
+                    <span class="btn-icon">➕</span>
+                    Add First Game
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="table-info">
+        <span class="results-count">
+            Showing <span id="visibleCount">@Model.Videogames.Count()</span> of <span id="totalCount">@Model.Videogames.Count()</span> games
+        </span>
+    </div>
+</div>
+
+<script src="~/js/videogamestable.js"></script>

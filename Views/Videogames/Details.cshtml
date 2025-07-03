@@ -1,0 +1,146 @@
+﻿@model VideogamesPOS.Models.Videogame
+
+@{
+    ViewData["Title"] = "Details";
+}
+<link rel="stylesheet" href="~/css/details.css" />
+
+<div class="game-details-container">
+    <div class="game-card">
+        <div class="game-header">
+            <h1 class="game-title">@Html.DisplayFor(model => model.Name)</h1>
+            <p class="game-subtitle">Game Details</p>
+        </div>
+
+        <div class="game-content">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="game-image-section">
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="game-image" />
+                </div>
+            }
+
+            <div class="game-info-grid">
+                <div class="info-card price">
+                    <div class="info-label">Price</div>
+                    <div class="info-value">$@Html.DisplayFor(model => model.Price)</div>
+                </div>
+
+                <div class="info-card rating">
+                    <div class="info-label">ESRB Rating</div>
+                    <div class="info-value">
+                        <div class="rating-display">
+                            @{
+                                var ratingValue = Model.Rating?.ToString() ?? "";
+                                var ratingClass = "rating-" + ratingValue.Replace("+", "");
+                                var ratingText = "";
+
+                                switch (ratingValue)
+                                {
+                                    case "E":
+                                        ratingText = "Everyone";
+                                        break;
+                                    case "E10+":
+                                        ratingText = "Everyone 10+";
+                                        ratingClass = "rating-E10";
+                                        break;
+                                    case "T":
+                                        ratingText = "Teen";
+                                        break;
+                                    case "M":
+                                        ratingText = "Mature 17+";
+                                        break;
+                                    case "AO":
+                                        ratingText = "Adults Only";
+                                        break;
+                                    case "RP":
+                                        ratingText = "Rating Pending";
+                                        break;
+                                    default:
+                                        ratingText = "Not Rated";
+                                        ratingClass = "rating-RP";
+                                        break;
+                                }
+                            }
+
+                            @if (!string.IsNullOrEmpty(ratingValue))
+                            {
+                                <div class="esrb-rating @ratingClass">
+                                    @ratingValue
+                                </div>
+                                <div class="rating-description">@ratingText</div>
+                            }
+                            else
+                            {
+                                <span class="no-data">Not Rated</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card stock">
+                    <div class="info-label">Stock Available</div>
+                    <div class="info-value">@Html.DisplayFor(model => model.Stock) units</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">Release Date</div>
+                    <div class="info-value">@Model.ReleaseDate.ToString("MM/dd/yyyy")</div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="description-section">
+                    <h3 class="description-title">📖 Description</h3>
+                    <p class="description-text">@Html.DisplayFor(model => model.Description)</p>
+                </div>
+            }
+
+            <div class="tags-section">
+                <div class="tag-group">
+                    <h4 class="tag-title">🎮 Genres</h4>
+                    <div class="tag-list">
+                        @if (Model.Genres != null && Model.Genres.Any())
+                        {
+                            @foreach (var genre in Model.Genres)
+                            {
+                                <span class="tag">@genre.Name</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="no-data">No genres assigned</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="tag-group">
+                    <h4 class="tag-title">🎯 Platforms</h4>
+                    <div class="tag-list">
+                        @if (Model.Platforms != null && Model.Platforms.Any())
+                        {
+                            @foreach (var platform in Model.Platforms)
+                            {
+                                <span class="tag platform-tag">@platform.Name</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="no-data">No platforms assigned</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="action-btn primary">
+                ✏️ Edit Game
+            </a>
+            <a asp-action="Index" class="action-btn secondary">
+                ← Back to List
+            </a>
+        </div>
+    </div>
+</div>

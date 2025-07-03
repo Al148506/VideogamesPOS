@@ -1,0 +1,16 @@
+﻿@model VideogamesPOS.Models.ViewModels.VideogameFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Videogame";
+}
+
+<partial name="_VideogameForm" model="Model" />
+
+@section Styles {
+    <link href="~/css/videogameform.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/videogameform.js"></script>
+}

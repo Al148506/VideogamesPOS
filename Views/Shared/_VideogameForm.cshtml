@@ -1,0 +1,64 @@
+﻿@model VideogamesPOS.Models.ViewModels.VideogameFormViewModel
+
+@{
+    var isEdit = Model.Videogame.Id > 0;
+    var title = isEdit ? "Edit Videogame" : "Create Videogame";
+    var actionName = isEdit ? "Edit" : "Create";
+}
+
+<h2 class="mb-4">@title</h2>
+
+<form asp-action="@actionName" method="post">
+    @if (isEdit)
+    {
+        @Html.HiddenFor(m => m.Videogame.Id)
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Videogame.Name" class="form-label"></label>
+        <input asp-for="Videogame.Name" class="form-control" />
+        <span asp-validation-for="Videogame.Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Videogame.Description" class="form-label"></label>
+        <textarea asp-for="Videogame.Description" class="form-control"></textarea>
+        <span asp-validation-for="Videogame.Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Videogame.ReleaseDate" class="form-label"></label>
+        <input asp-for="Videogame.ReleaseDate" class="form-control" type="date" />
+        <span asp-validation-for="Videogame.ReleaseDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Videogame.Price" class="form-label"></label>
+        <input asp-for="Videogame.Price" class="form-control" />
+        <span asp-validation-for="Videogame.Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Videogame.ImageUrl" class="form-label"></label>
+        <input asp-for="Videogame.ImageUrl" class="form-control" />
+        <span asp-validation-for="Videogame.ImageUrl" class="text-danger"></span>
+    </div>
+
+    <!-- Platforms -->
+    <div class="mb-3">
+        <label class="form-label">Platforms</label>
+        <select asp-for="SelectedPlatformIds" asp-items="Model.AvailablePlatforms" class="form-control" multiple></select>
+        <span asp-validation-for="SelectedPlatformIds" class="text-danger"></span>
+    </div>
+
+    <!-- Genres -->
+    <div class="mb-3">
+        <label class="form-label">Genres</label>
+        <select asp-for="SelectedGenreIds" asp-items="Model.AvailableGenres" class="form-control" multiple></select>
+        <span asp-validation-for="SelectedGenreIds" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">@title</button>
+</form>

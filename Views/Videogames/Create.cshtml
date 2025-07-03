@@ -1,0 +1,90 @@
+﻿@model VideogamesPOS.Models.ViewModels.VideogameFormViewModel
+@{
+    ViewData["Title"] = "Crear Videojuego";
+}
+<link href="~/css/videogameform.css" rel="stylesheet" />
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>🎮 Nuevo Videojuego</h1>
+            <p>Agrega un nuevo videojuego a tu inventario</p>
+        </div>
+
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="Videogame.Name">🎯 Nombre del Juego</label>
+                    <input asp-for="Videogame.Name" class="form-control" placeholder="Ej: The Legend of Zelda" />
+                    <span asp-validation-for="Videogame.Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Videogame.Rating">ESBR Rating</label>
+                    <select asp-for="Videogame.Rating" asp-items="Model.AvailableRatings" class="form-control">
+                        <option value="">-- Select a rating --</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label asp-for="Videogame.Description">📝 Descripción</label>
+                    <textarea asp-for="Videogame.Description" class="form-control" placeholder="Describe el videojuego, su historia, características principales..."></textarea>
+                    <span asp-validation-for="Videogame.Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>🎮 Plataformas</label>
+                    <select asp-for="SelectedPlatformIds" asp-items="Model.AvailablePlatforms" class="form-control" multiple>
+                    </select>
+                    <small class="text-muted">Mantén presionado Ctrl/Cmd para seleccionar múltiples opciones</small>
+                </div>
+
+                <div class="form-group">
+                    <label>🎪 Géneros</label>
+                    <select asp-for="SelectedGenreIds" asp-items="Model.AvailableGenres" class="form-control" multiple>
+                    </select>
+                    <small class="text-muted">Mantén presionado Ctrl/Cmd para seleccionar múltiples opciones</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Videogame.ReleaseDate">📅 Fecha de Lanzamiento</label>
+                    <input asp-for="Videogame.ReleaseDate" class="form-control" type="date" />
+                    <span asp-validation-for="Videogame.ReleaseDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group price-input">
+                    <label asp-for="Videogame.Price">💰 Precio</label>
+                    <input asp-for="Videogame.Price" class="form-control" placeholder="59.99" step="0.01" min="0" />
+                    <span asp-validation-for="Videogame.Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Videogame.Stock">📦 Stock</label>
+                    <input asp-for="Videogame.Stock" class="form-control" placeholder="Ej: 25" min="0" />
+                    <span asp-validation-for="Videogame.Stock" class="text-danger"></span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label asp-for="Videogame.ImageUrl">🖼️ URL de la Imagen</label>
+                    <input asp-for="Videogame.ImageUrl" class="form-control" placeholder="https://ejemplo.com/imagen.jpg" />
+                    <span asp-validation-for="Videogame.ImageUrl" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary">
+                    ✨ Crear Videojuego
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    ↩️ Volver al Listado
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/videogameform.js"></script>
+}
