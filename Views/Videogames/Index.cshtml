@@ -23,7 +23,7 @@
             <span class="search-icon">🔍</span>
         </div>
         <div class="filter-container">
-            <select name="sortOrder id="sortSelect" class="filter-select" onchange="this.form.submit()">
+            <select name="sortOrder" id="sortSelect" class="filter-select" onchange="this.form.submit()">
                 <option value="name" selected="@(Model.SortOrder == "name" ? "selected" : null)">Sort by Name</option>
                 <option value="rating" selected="@(Model.SortOrder == "rating" ? "selected" : null)">Sort by Rating</option>
                 <option value="price" selected="@(Model.SortOrder == "price" ? "selected" : null)">Sort by Price</option>

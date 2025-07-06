@@ -25,17 +25,17 @@ namespace VideogamesPOS.Controllers
         }
 
         // GET: Videogames
-        public async Task<IActionResult> Index(string? searchTerm, string? sortOrder)
+        public async Task<IActionResult> Index(string? searchTerm, string? sortOrder,int pageNumber = 1, int pageSize = 5)
         {
             var query = _context.Videogames.AsQueryable();
 
-            // Filtro por nombre
+            // Filtro Name
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(v => v.Name.Contains(searchTerm));
             }
 
-            // Ordenamiento
+            // Order
             query = sortOrder switch
             {
                 "rating" => query.OrderByDescending(v => v.Rating),
