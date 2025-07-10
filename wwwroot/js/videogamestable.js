@@ -18,24 +18,30 @@ function initializeImageLazyLoading() {
     const images = document.querySelectorAll('.game-image');
 
     images.forEach(img => {
-        // Add loading placeholder
-        img.addEventListener('load', function () {
+        // Evitar múltiples registros
+        img.onload = function () {
             this.style.opacity = '1';
-        });
+        };
 
-        // Handle image errors
-        img.addEventListener('error', function () {
+        img.onerror = function () {
             const placeholder = document.createElement('div');
             placeholder.className = 'no-image';
             placeholder.textContent = '🎮';
             this.parentNode.replaceChild(placeholder, this);
-        });
+        };
 
-        // Set initial opacity for smooth loading
         img.style.opacity = '0';
         img.style.transition = 'opacity 0.3s ease';
+
+        // Si la imagen ya está cargada (caché), ejecuta onload manualmente
+        if (img.complete && img.naturalWidth !== 0) {
+            img.onload();
+        } else if (img.complete && img.naturalWidth === 0) {
+            img.onerror();
+        }
     });
 }
+
 
 // Tooltip functionality
 function initializeTooltips() {

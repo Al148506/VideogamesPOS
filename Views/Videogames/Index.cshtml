@@ -23,12 +23,24 @@
             <span class="search-icon">🔍</span>
         </div>
         <div class="filter-container">
-            <select name="sortOrder" id="sortSelect" class="filter-select" onchange="this.form.submit()">
+            <select name="sortOrder" class="filter-select">
                 <option value="name" selected="@(Model.SortOrder == "name" ? "selected" : null)">Sort by Name</option>
                 <option value="rating" selected="@(Model.SortOrder == "rating" ? "selected" : null)">Sort by Rating</option>
                 <option value="price" selected="@(Model.SortOrder == "price" ? "selected" : null)">Sort by Price</option>
                 <option value="release" selected="@(Model.SortOrder == "release" ? "selected" : null)">Sort by Release Date</option>
             </select>
+
+            <select name="sortDirection" class="filter-select">
+                <option value="asc" selected="@(Model.SortDirection == "asc" ? "selected" : null)">Ascendente</option>
+                <option value="desc" selected="@(Model.SortDirection == "desc" ? "selected" : null)">Descendente</option>
+            </select>
+        </div>
+        <div class="filter-buttons">
+            <button type="submit" class="btn btn-primary apply-button">Apply</button>
+
+            <!-- Botón para limpiar filtros -->
+            <a asp-action="Index" class="btn btn-primary clear-button">Clear Filters</a>
+
         </div>
     </form>
 
@@ -112,8 +124,9 @@
                                asp-action="Index"
                                asp-route-searchTerm="@Model.SearchTerm"
                                asp-route-sortOrder="@Model.SortOrder"
+                               asp-route-sortDirection="@Model.SortDirection"
                                asp-route-pageNumber="@i"
-                               asp-route-pageSize="@Model.PageSize">
+                               asp-route-pageSize="@Model.RecordsPerPage">
                                 @i
                             </a>
                         </li>

@@ -41,12 +41,21 @@ namespace VideogamesPOS.Controllers
             }
 
             // Ordenamiento
-            query = filter.SortOrder switch
+            query = (filter.SortOrder, filter.SortDirection?.ToLower()) switch
             {
-                "rating" => query.OrderByDescending(v => v.Rating),
-                "price" => query.OrderBy(v => v.Price),
-                "release" => query.OrderByDescending(v => v.ReleaseDate),
-                "stock" => query.OrderByDescending(v => v.Stock),
+                ("rating", "desc") => query.OrderByDescending(v => v.Rating),
+                ("rating", _) => query.OrderBy(v => v.Rating),
+
+                ("price", "desc") => query.OrderByDescending(v => v.Price),
+                ("price", _) => query.OrderBy(v => v.Price),
+
+                ("release", "desc") => query.OrderByDescending(v => v.ReleaseDate),
+                ("release", _) => query.OrderBy(v => v.ReleaseDate),
+
+                ("stock", "desc") => query.OrderByDescending(v => v.Stock),
+                ("stock", _) => query.OrderBy(v => v.Stock),
+
+                ("name", "desc") => query.OrderByDescending(v => v.Name),
                 _ => query.OrderBy(v => v.Name)
             };
 
