@@ -103,6 +103,24 @@
                     }
                 </tbody>
             </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-searchTerm="@Model.SearchTerm"
+                               asp-route-sortOrder="@Model.SortOrder"
+                               asp-route-pageNumber="@i"
+                               asp-route-pageSize="@Model.PageSize">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
         </div>
 
         @if (!Model.Videogames.Any())

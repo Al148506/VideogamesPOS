@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VideogamesPOS.Data;
+using VideogamesPOS.DTO;
 using VideogamesPOS.Models;
 using VideogamesPOS.Models.ViewModels;
 
@@ -17,39 +19,52 @@ namespace VideogamesPOS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public VideogamesController(ApplicationDbContext context, IConfiguration configuration)
+        public VideogamesController(ApplicationDbContext context, IConfiguration configuration, IMapper mapper)
         {
             _context = context;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         // GET: Videogames
-        public async Task<IActionResult> Index(string? searchTerm, string? sortOrder,int pageNumber = 1, int pageSize = 5)
+        public async Task<IActionResult> Index([FromQuery] VideogamesFilterDTO filter)
         {
             var query = _context.Videogames.AsQueryable();
 
-            // Filtro Name
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            // Filtro por búsqueda
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
-                query = query.Where(v => v.Name.Contains(searchTerm));
+                string searchLower = filter.SearchTerm.ToLower();
+                query = query.Where(v => v.Name.ToLower().Contains(searchLower));
             }
 
-            // Order
-            query = sortOrder switch
+            // Ordenamiento
+            query = filter.SortOrder switch
             {
                 "rating" => query.OrderByDescending(v => v.Rating),
                 "price" => query.OrderBy(v => v.Price),
                 "release" => query.OrderByDescending(v => v.ReleaseDate),
+                "stock" => query.OrderByDescending(v => v.Stock),
                 _ => query.OrderBy(v => v.Name)
             };
 
-            var viewModel = new VideogameIndexViewModel
-            {
-                SearchTerm = searchTerm,
-                SortOrder = sortOrder,
-                Videogames = await query.ToListAsync()
-            };
+            // Total de resultados
+            int totalItems = await query.CountAsync();
+
+            // Paginación
+            var videogames = await query
+                .Skip(filter.Pagination.Skip)
+                .Take(filter.Pagination.RecordsPerPage)
+                .ToListAsync();
+
+            // Mapeamos desde el filtro al ViewModel
+            var viewModel = _mapper.Map<VideogameIndexViewModel>(filter);
+
+            // Asignamos las propiedades que vienen del query
+            viewModel.Videogames = videogames;
+            viewModel.TotalItems = totalItems;
 
             return View(viewModel);
         }

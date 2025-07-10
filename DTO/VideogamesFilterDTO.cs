@@ -2,20 +2,14 @@
 {
     public class VideogamesFilterDTO
     {
-        public int Page { get; set; }
-        public int RecordsPerPage { get; set; }
-        internal PaginationDTO Pagination
-        {
-            get
-            {
-                return new PaginationDTO { Page = Page, RecordsPerPage = RecordsPerPage };
-            }
-        }
+        public int Page { get; set; } = 1;
+        public int RecordsPerPage { get; set; } = 10;
 
-        public string? Name { get; set; }
-        public decimal Price { get; set; }
-        public DateTime ReleaseDate { get; set; }
-        public bool ComingSoon { get; set; }
+        public string? SearchTerm { get; set; }
+        public string? SortOrder { get; set; }
 
+        public PaginationDTO Pagination =>
+            new PaginationDTO { PageNumber = Page, RecordsPerPage = RecordsPerPage };
     }
+
 }
