@@ -1,64 +1,109 @@
 ﻿@model VideogamesPOS.Models.ViewModels.VideogameFormViewModel
-
 @{
-    var isEdit = Model.Videogame.Id > 0;
-    var title = isEdit ? "Edit Videogame" : "Create Videogame";
+    // Detecta modo
+    var isEdit = Model?.Videogame?.Id > 0;
+    var pageTitle = isEdit ? "✏️ Edit Videogame" : "🎮 New Videogame";
+    var pageSubtext = isEdit ? "Update videogame information" : "Create a new videogame";
     var actionName = isEdit ? "Edit" : "Create";
+    var submitLabel = isEdit ? "💾 Save Changes" : "✨ Create Videogame";
+
+    ViewData["Title"] = isEdit ? "Edit Videogame" : "Create Videogame";
 }
+<link href="~/css/videogameform.css" rel="stylesheet" />
 
-<h2 class="mb-4">@title</h2>
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>@pageTitle</h1>
+            <p>@pageSubtext</p>
+        </div>
 
-<form asp-action="@actionName" method="post">
-    @if (isEdit)
-    {
-        @Html.HiddenFor(m => m.Videogame.Id)
-    }
+        <form asp-action="@actionName" method="post" asp-route-id="@(isEdit ? Model.Videogame.Id : (int?)null)">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div id="loading-message" style="display:none; color:#1976d2; margin-bottom: 1rem;">Loading information, please wait...</div>
+            <input asp-for="Videogame.Id" type="hidden" />
+            <div class="form-grid">
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label asp-for="Videogame.Name" class="form-label"></label>
+                    <input asp-for="Videogame.Name" class="form-control" />
+                    <span asp-validation-for="Videogame.Name" class="text-danger"></span>
+                </div>
+                <!-- Rating (ESRB) -->
+                <div class="form-group">
+                    <label asp-for="Videogame.Rating" class="form-label"></label>
+                    <select asp-for="Videogame.Rating" asp-items="Model.AvailableRatings" class="form-select">
+                        <option value="">-- Select rating --</option>
+                    </select>
+                    <span asp-validation-for="Videogame.Rating" class="text-danger"></span>
+                </div>
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label asp-for="Videogame.Description">📝 Descripción</label>
+                    <textarea asp-for="Videogame.Description" class="form-control" placeholder="Describe el videojuego, su historia, características principales..."></textarea>
+                    <span asp-validation-for="Videogame.Description" class="text-danger"></span>
+                </div>
+                <!-- Plataformas -->
+                <div class="form-group">
+                    <label class="form-label">Plataforms</label>
+                    <select asp-for="SelectedPlatformIds" asp-items="Model.AvailablePlatforms" multiple class="form-select"></select>
+                    <span asp-validation-for="SelectedPlatformIds" class="text-danger"></span>
+                </div>
 
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <!-- Géneros -->
+                <div class="form-group">
+                    <label class="form-label">Genres</label>
+                    <select asp-for="SelectedGenreIds" asp-items="Model.AvailableGenres" multiple class="form-select"></select>
+                    <span asp-validation-for="SelectedGenreIds" class="text-danger"></span>
+                </div>
+                <!-- Release Date -->
+                <div class="form-group">
+                    <label asp-for="Videogame.ReleaseDate">📅 Fecha de Lanzamiento</label>
+                    <input asp-for="Videogame.ReleaseDate" class="form-control" type="date" />
+                    <span asp-validation-for="Videogame.ReleaseDate" class="text-danger"></span>
+                </div>
 
-    <div class="mb-3">
-        <label asp-for="Videogame.Name" class="form-label"></label>
-        <input asp-for="Videogame.Name" class="form-control" />
-        <span asp-validation-for="Videogame.Name" class="text-danger"></span>
+                <!-- Precio -->
+                <div class="form-group">
+                    <label asp-for="Videogame.Price" class="form-label"></label>
+                    <input asp-for="Videogame.Price" class="form-control" />
+                    <span asp-validation-for="Videogame.Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Videogame.Stock">📦 Stock</label>
+                    <input asp-for="Videogame.Stock" class="form-control" placeholder="Ej: 25" min="0" />
+                    <span asp-validation-for="Videogame.Stock" class="text-danger"></span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label asp-for="Videogame.ImageUrl">🖼️ URL de la Imagen</label>
+                    <input asp-for="Videogame.ImageUrl" class="form-control" placeholder="https://ejemplo.com/imagen.jpg" />
+                    <span asp-validation-for="Videogame.ImageUrl" class="text-danger"></span>
+                </div>
+
+
+
+
+
+                <!-- Otros campos que ya tengas... -->
+                @* Coloca aquí tus inputs que en Create aparecen entre los ... *@
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    @submitLabel
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    ↩️ Back to Index
+                </a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="Videogame.Description" class="form-label"></label>
-        <textarea asp-for="Videogame.Description" class="form-control"></textarea>
-        <span asp-validation-for="Videogame.Description" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Videogame.ReleaseDate" class="form-label"></label>
-        <input asp-for="Videogame.ReleaseDate" class="form-control" type="date" />
-        <span asp-validation-for="Videogame.ReleaseDate" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Videogame.Price" class="form-label"></label>
-        <input asp-for="Videogame.Price" class="form-control" />
-        <span asp-validation-for="Videogame.Price" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Videogame.ImageUrl" class="form-label"></label>
-        <input asp-for="Videogame.ImageUrl" class="form-control" />
-        <span asp-validation-for="Videogame.ImageUrl" class="text-danger"></span>
-    </div>
-
-    <!-- Platforms -->
-    <div class="mb-3">
-        <label class="form-label">Platforms</label>
-        <select asp-for="SelectedPlatformIds" asp-items="Model.AvailablePlatforms" class="form-control" multiple></select>
-        <span asp-validation-for="SelectedPlatformIds" class="text-danger"></span>
-    </div>
-
-    <!-- Genres -->
-    <div class="mb-3">
-        <label class="form-label">Genres</label>
-        <select asp-for="SelectedGenreIds" asp-items="Model.AvailableGenres" class="form-control" multiple></select>
-        <span asp-validation-for="SelectedGenreIds" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">@title</button>
-</form>
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/js/videogameform.js"></script>
+}

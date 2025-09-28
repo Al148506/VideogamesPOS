@@ -37,6 +37,7 @@
                     <label>🎮 Plataformas</label>
                     <select asp-for="SelectedPlatformIds" asp-items="Model.AvailablePlatforms" class="form-control" multiple>
                     </select>
+                    <span asp-validation-for="SelectedPlatformIds" class="text-danger"></span>
                     <small class="text-muted">Mantén presionado Ctrl/Cmd para seleccionar múltiples opciones</small>
                 </div>
 
@@ -44,6 +45,7 @@
                     <label>🎪 Géneros</label>
                     <select asp-for="SelectedGenreIds" asp-items="Model.AvailableGenres" class="form-control" multiple>
                     </select>
+                    <span asp-validation-for="SelectedGenreIds" class="text-danger"></span>
                     <small class="text-muted">Mantén presionado Ctrl/Cmd para seleccionar múltiples opciones</small>
                 </div>
 

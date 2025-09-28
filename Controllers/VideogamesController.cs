@@ -10,8 +10,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VideogamesPOS.Data;
 using VideogamesPOS.DTO;
+using VideogamesPOS.Helper;
 using VideogamesPOS.Models;
 using VideogamesPOS.Models.ViewModels;
+using VideogamesPOS.Utilities;
 
 namespace VideogamesPOS.Controllers
 {
@@ -20,44 +22,30 @@ namespace VideogamesPOS.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
+        private readonly BuildFormVideogames _formHelper;
 
-        public VideogamesController(ApplicationDbContext context, IConfiguration configuration, IMapper mapper)
+        public VideogamesController(ApplicationDbContext context, IConfiguration configuration, IMapper mapper, BuildFormVideogames formHelper)
         {
             _context = context;
             _configuration = configuration;
             _mapper = mapper;
+            _formHelper = formHelper;
         }
 
         // GET: Videogames
         public async Task<IActionResult> Index([FromQuery] VideogamesFilterDTO filter)
         {
-            var query = _context.Videogames.AsQueryable();
+            var query = _context.Videogames.AsNoTracking();
 
             // Filtro por búsqueda
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
-                string searchLower = filter.SearchTerm.ToLower();
-                query = query.Where(v => v.Name.ToLower().Contains(searchLower));
+                var pattern = $"%{filter.SearchTerm}%";
+                query = query.Where(v => EF.Functions.Like(v.Name, pattern));
             }
 
             // Ordenamiento
-            query = (filter.SortOrder, filter.SortDirection?.ToLower()) switch
-            {
-                ("rating", "desc") => query.OrderByDescending(v => v.Rating),
-                ("rating", _) => query.OrderBy(v => v.Rating),
-
-                ("price", "desc") => query.OrderByDescending(v => v.Price),
-                ("price", _) => query.OrderBy(v => v.Price),
-
-                ("release", "desc") => query.OrderByDescending(v => v.ReleaseDate),
-                ("release", _) => query.OrderBy(v => v.ReleaseDate),
-
-                ("stock", "desc") => query.OrderByDescending(v => v.Stock),
-                ("stock", _) => query.OrderBy(v => v.Stock),
-
-                ("name", "desc") => query.OrderByDescending(v => v.Name),
-                _ => query.OrderBy(v => v.Name)
-            };
+            query = query.OrderByFrom(filter.SortOrder, filter.SortDirection);
 
             // Total de resultados
             int totalItems = await query.CountAsync();
@@ -77,7 +65,6 @@ namespace VideogamesPOS.Controllers
 
             return View(viewModel);
         }
-
 
         // GET: Videogames/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -113,7 +100,7 @@ namespace VideogamesPOS.Controllers
                 .ToList()
 
             };
-            return View(viewModel);
+            return View("_VideogameForm",viewModel);
         }
 
         // POST: Videogames/Create
@@ -125,17 +112,6 @@ namespace VideogamesPOS.Controllers
             {
                 foreach (var entry in ModelState)
                 {
-                    if (viewModel.SelectedPlatformIds == null || !viewModel.SelectedPlatformIds.Any())
-                    {
-                        ModelState.AddModelError("SelectedPlatformIds", "You must select at least one platform.");
-                    }
-
-                    if (viewModel.SelectedGenreIds == null || !viewModel.SelectedGenreIds.Any())
-                    {
-                        ModelState.AddModelError("SelectedGenreIds", "You must select at least one genre.");
-                    }
-
-
 
                     foreach (var error in entry.Value.Errors)
                     {
@@ -167,41 +143,23 @@ namespace VideogamesPOS.Controllers
                 .Select(g => new SelectListItem { Value = g.Id.ToString(), Text = g.Name })
                 .ToList();
 
-            return View(viewModel);
+            return View("_VideogameForm",viewModel);
         }
 
         // GET: Videogames/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null) return NotFound("A videogame id is required.");
 
             var videogame = await _context.Videogames
                 .Include(v => v.Platforms)
                 .Include(v => v.Genres)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
-            if (videogame == null) return NotFound();
+            if (videogame == null) return NotFound("Videogame not found.");
 
-            var viewModel = new VideogameFormViewModel
-            {
-                Videogame = videogame,
-                SelectedPlatformIds = videogame.Platforms.Select(p => p.Id).ToList(),
-                SelectedGenreIds = videogame.Genres.Select(g => g.Id).ToList(),
-                AvailablePlatforms = _context.Platforms
-                    .Select(p => new SelectListItem
-                    {
-                        Value = p.Id.ToString(),
-                        Text = p.Name
-                    }).ToList(),
-                AvailableGenres = _context.Genres
-                    .Select(g => new SelectListItem
-                    {
-                        Value = g.Id.ToString(),
-                        Text = g.Name
-                    }).ToList()
-            };
-
-            return View(viewModel);
+            var viewModel = await _formHelper.BuildFormViewModelAsync(videogame);
+            return View("_VideogameForm", viewModel);
         }
 
 
@@ -212,33 +170,34 @@ namespace VideogamesPOS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, VideogameFormViewModel viewModel)
         {
-            if (id != viewModel.Videogame.Id)
-                return NotFound();
-
-            if (!ModelState.IsValid ||
-                viewModel.SelectedPlatformIds == null || !viewModel.SelectedPlatformIds.Any() ||
-                viewModel.SelectedGenreIds == null || !viewModel.SelectedGenreIds.Any())
+            // Debug: Ver errores exactos de ModelState
+            foreach (var key in ModelState.Keys)
             {
-                if (viewModel.SelectedPlatformIds == null || !viewModel.SelectedPlatformIds.Any())
-                {
-                    ModelState.AddModelError("SelectedPlatformIds", "You must select at least one platform.");
-                }
+                var entry = ModelState[key];
+                foreach (var error in entry.Errors)
+                    Console.WriteLine($"[Edit POST] ModelState error on '{key}': {error.ErrorMessage}");
+            }
 
-                if (viewModel.SelectedGenreIds == null || !viewModel.SelectedGenreIds.Any())
-                {
-                    ModelState.AddModelError("SelectedGenreIds", "You must select at least one genre.");
-                }
+            // Validar que el id de la ruta coincida con el del modelo
+            if (viewModel?.Videogame == null || id != viewModel.Videogame.Id)
+                return BadRequest("Route ID does not match the model ID.");
 
-                // Repoblar los dropdowns
-                viewModel.AvailablePlatforms = _context.Platforms
-                    .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                    .ToList();
+            // Validar plataformas y géneros manualmente
+            if (viewModel.SelectedPlatformIds == null || !viewModel.SelectedPlatformIds.Any())
+            {
+                ModelState.AddModelError(nameof(viewModel.SelectedPlatformIds), "Debes seleccionar al menos una plataforma.");
+            }
 
-                viewModel.AvailableGenres = _context.Genres
-                    .Select(g => new SelectListItem { Value = g.Id.ToString(), Text = g.Name })
-                    .ToList();
+            if (viewModel.SelectedGenreIds == null || !viewModel.SelectedGenreIds.Any())
+            {
+                ModelState.AddModelError(nameof(viewModel.SelectedGenreIds), "Debes seleccionar al menos un género.");
+            }
 
-                return View(viewModel);
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("[Edit POST] Model is invalid; re-rendering form with validation messages.");
+                await _formHelper.PopulateSelectListsAsync(viewModel);
+                return View("_VideogameForm", viewModel);
             }
 
             var videogameToUpdate = await _context.Videogames
@@ -249,11 +208,9 @@ namespace VideogamesPOS.Controllers
             if (videogameToUpdate == null) return NotFound();
 
             // Actualizar propiedades simples
-            videogameToUpdate.Name = viewModel.Videogame.Name;
-            videogameToUpdate.Description = viewModel.Videogame.Description;
-            videogameToUpdate.ReleaseDate = viewModel.Videogame.ReleaseDate;
-            videogameToUpdate.Price = viewModel.Videogame.Price;
-            videogameToUpdate.ImageUrl = viewModel.Videogame.ImageUrl;
+            _context.Entry(videogameToUpdate)
+         .CurrentValues
+         .SetValues(viewModel.Videogame);
             // etc.
 
             // Actualizar relaciones muchos a muchos
@@ -302,10 +259,6 @@ namespace VideogamesPOS.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VideogameExists(int id)
-        {
-            return _context.Videogames.Any(e => e.Id == id);
-        }
 
         [HttpGet]
         public async Task<IActionResult> AutocompleteFromRawg(string name)

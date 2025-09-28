@@ -39,6 +39,18 @@ button.accept-policy {
   line-height: inherit;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1; /* ocupa todo el espacio disponible */
+}
+
+
 .footer {
   position: absolute;
   bottom: 0;

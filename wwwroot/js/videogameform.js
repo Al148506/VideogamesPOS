@@ -27,9 +27,12 @@ if (imageUrlInput) {
         }
     });
 }
+
+
 document.getElementById("Videogame_Name").addEventListener("blur", async function () {
     const name = this.value;
     if (name.length < 3) return;
+    document.getElementById("loading-message").style.display = "block"; // Show loading message
 
     const response = await fetch(`/Videogames/AutocompleteFromRawg?name=${encodeURIComponent(name)}`);
     if (!response.ok) return;
@@ -57,6 +60,8 @@ document.getElementById("Videogame_Name").addEventListener("blur", async functio
     // Seleccionar plataformas y géneros automáticamente
     selectOptionsByNames("SelectedPlatformIds", data.platforms);
     selectOptionsByNames("SelectedGenreIds", data.genres);
+
+    document.getElementById("loading-message").style.display = "none"; // Hide message
 });
 
 function selectOptionsByNames(selectId, namesArray) {

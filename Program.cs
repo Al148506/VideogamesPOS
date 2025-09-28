@@ -6,7 +6,8 @@ using VideogamesPOS.Data;
 using VideogamesPOS.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using VideogamesPOS.Utilities; // <-- asegúrate de tener esto
+using VideogamesPOS.Utilities;
+using VideogamesPOS.Helper; // <-- asegúrate de tener esto
 
 
 
@@ -41,6 +42,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+
 builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<AutoMapperProfiles>(); });
 builder.Services.AddControllersWithViews(options =>
 {
@@ -57,6 +59,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddScoped<BuildFormVideogames>();
 
 
 var app = builder.Build();
